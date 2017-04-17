@@ -9,6 +9,67 @@ module.exports = async (page, scenario) => {
     complexInteraction.length > 0
   ) {
     for (interaction of complexInteraction) {
+      if (interaction.type == "await") {
+        await page.waitFor(interaction.selector);
+        console.log("Awaited " + interaction.selector);
+        if (interaction.wait) {
+          await page.waitFor(interaction.wait);
+        }
+      }
+
+      if (interaction.type == "awaitVisible") {
+        await page.waitForSelector(interaction.selector, { visible: true });
+        console.log(
+          "Waited for " + interaction.selector + " to become visible"
+        );
+        if (interaction.wait) {
+          await page.waitFor(interaction.wait);
+        }
+      }
+
+      if (interaction.type == "awaitHidden") {
+        await page.waitForSelector(interaction.selector, { hidden: true });
+        console.log("Waited for " + interaction.selector + " to become hidden");
+        if (interaction.wait) {
+          await page.waitFor(interaction.wait);
+        }
+      }
+
+      if (interaction.type == "awaitBackgroundImage") {
+        // Note that broken images will count as complete, so the process won't hang indefinitely. However, it will wait until even huuuuuuge images finish rendering (or the process times out...)
+        // In order to use await inside of it, the function inside page.evaluate needs to be asynchronous
+        await page.evaluate(async (interaction) => {
+          function rafAsync() {
+            return new Promise((resolve) => {
+              requestAnimationFrame(resolve); //faster than set time out
+            });
+          }
+
+          function checkComplete(image) {
+            if (image.complete !== true) {
+              return rafAsync().then(() => checkComplete(image));
+            } else {
+              console.log(
+                "Awaited the background image of the " +
+                  interaction.selector +
+                  " element. (Either it finished loading or it's broken...)"
+              );
+              return Promise.resolve(true);
+            }
+          }
+
+          var element = document.querySelector(interaction.selector);
+          var style =
+            element.currentStyle || window.getComputedStyle(element, false);
+          var url = style.backgroundImage.slice(4, -1).replace(/['"]/g, "");
+          var img = new Image();
+          img.src = url;
+
+          // Note that broken qualifies as complete. *But* no un- or partially-loaded background images!
+          await checkComplete(img);
+        }, interaction);
+      }
+
       if (interaction.type == "hover") {
         await page.waitFor(interaction.selector);
         await page.hover(interaction.selector);

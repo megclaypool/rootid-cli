@@ -40,6 +40,26 @@ Here's an example of a bare minimum elements.json file:
 ```
 "complexInteraction": [
       {
+        "type": "await",
+        "selector": "some_selector",
+        "wait": integer    // how long to wait after the selected element finishes rendering
+      },
+      {
+        "type": "awaitVisible",
+        "selector": "some_selector",
+        "wait": integer    // how long to wait after the selected element becomes visible
+      },
+      {
+        "type": "awaitHidden",
+        "selector": "some_selector",
+        "wait": integer    // how long to wait after the selected element becomes hidden
+      },
+      {
+        "type": "awaitBackgroundImage",
+        "selector": "some_selector",
+        "wait": integer    // how long to wait after the selected elements' css background image is fully loaded (or broken)
+      },
+      {
         "type": "click",
         "selector": "some_selector",
         "wait": integer    // how long to wait after clicking
