@@ -121,6 +121,22 @@ module.exports = async (page, scenario) => {
         }
       }
 
+      if (interaction.type == "pauseFlexslider") {
+        await page.evaluate(() => {
+          if (
+            typeof jQuery !== "undefined" &&
+            typeof jQuery.fn.flexslider !== "undefined"
+          ) {
+            var sliders = jQuery(".flexslider");
+            sliders.flexslider("pause");
+            // start would be sliders.flexslider("play");
+          }
+        });
+        if (interaction.wait) {
+          await page.waitFor(interaction.wait);
+        }
+      }
+
       if (interaction.type == "applyJQueryCode") {
         await page.evaluate((interaction) => {
           if (typeof jQuery !== "undefined") {
